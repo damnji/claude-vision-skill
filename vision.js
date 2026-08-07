@@ -29,11 +29,13 @@ const MODEL = process.env.VISION_MODEL || "xxx";
 
 function parseArgs() {
   const argv = process.argv.slice(2);
-  let imageSource = "", prompt = "", isUrl = false, useClipboard = false;
+  let imageSource = "", prompt = "", isUrl = false, useClipboard = false, noFallback = false;
 
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--clipboard") {
       useClipboard = true;
+    } else if (argv[i] === "--no-fallback") {
+      noFallback = true;
     } else if (argv[i] === "--url" && argv[i + 1]) {
       isUrl = true;
       imageSource = argv[++i];
@@ -45,8 +47,11 @@ function parseArgs() {
       prompt = prompt ? prompt + " " + argv[i] : argv[i];
     }
   }
+  if (/^https?:\/\//i.test(imageSource)) {
+    isUrl = true;
+  }
   if (!prompt) prompt = "请详细描述这张图片的内容。";
-  return { imageSource, prompt, isUrl, useClipboard };
+  return { imageSource, prompt, isUrl, useClipboard, noFallback };
 }
 
 function getClipboardReader() {
@@ -137,24 +142,51 @@ async function main() {
     console.error("获取 Key: https://bailian.console.aliyun.com/");
     process.exit(1);
   }
-  const { imageSource, prompt, isUrl, useClipboard } = parseArgs();
+  const { imageSource, prompt, isUrl, useClipboard, noFallback } = parseArgs();
   let source = imageSource;
+
+  const tryClipboard = () => {
+    try {
+      source = readClipboardImage();
+      console.error("（未提供可用图片路径，已自动回退读取系统剪贴板）");
+      return true;
+    } catch (err) {
+      console.error("剪贴板读取失败:", err.message);
+      return false;
+    }
+  };
+
+  const showUsage = () => {
+    console.error("用法: node vision.js <图片路径> [问题]");
+    console.error("      node vision.js --url <图片链接> [问题]");
+    console.error("      node vision.js --clipboard [问题]");
+  };
+
   if (useClipboard) {
     if (imageSource || isUrl) {
       console.error("--clipboard 不能和图片路径或 --url 同时使用。");
       process.exit(1);
     }
-    try {
-      source = readClipboardImage();
-    } catch (err) {
-      console.error("无法从剪贴板读取图片:", err.message);
+    if (!tryClipboard()) process.exit(1);
+  } else if (source && !isUrl) {
+    const resolved = path.resolve(source);
+    if (!fs.existsSync(resolved)) {
+      if (noFallback) {
+        console.error(`文件不存在: ${resolved}`);
+        process.exit(1);
+      }
+      if (!tryClipboard()) process.exit(1);
+    }
+  } else if (!source) {
+    if (noFallback) {
+      showUsage();
       process.exit(1);
     }
+    if (!tryClipboard()) process.exit(1);
   }
+
   if (!source) {
-    console.error("用法: node vision.js <图片路径> [问题]");
-    console.error("      node vision.js --url <图片链接> [问题]");
-    console.error("      node vision.js --clipboard [问题]");
+    showUsage();
     process.exit(1);
   }
   try {

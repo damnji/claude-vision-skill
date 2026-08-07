@@ -25,6 +25,12 @@ node /Users/wwu/.codex/skills/claude-vision-skill/vision.js --clipboard "<prompt
 
 `--clipboard` reads the current image from the system clipboard (macOS uses a bundled Swift helper, Windows uses a bundled PowerShell script; the pasted image is usually still there). If it fails, ask the user to save the image to a file and provide the absolute path.
 
+Fallback rules (automatic):
+
+- If a local path is given but the file does not exist, vision.js automatically falls back to the clipboard.
+- If no image path or URL is given at all, vision.js automatically tries the clipboard.
+- Pass `--no-fallback` to disable this behavior and fail with an explicit error instead.
+
 Rules:
 
 - Always use the absolute path to `vision.js`.
