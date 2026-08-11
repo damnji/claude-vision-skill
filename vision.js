@@ -5,6 +5,7 @@
  * 用法:
  *   node vision.js <图片路径> [问题]
  *   node vision.js --url <图片链接> [问题]
+ *   node vision.js --clipboard [问题]
  *
  * 依赖:
  *   npm install dotenv (可选，如果有 .env 文件)
@@ -15,6 +16,8 @@ const fs = require("fs");
 const path = require("path");
 const https = require("https");
 const http = require("http");
+const os = require("os");
+const { execFileSync } = require("child_process");
 
 // 尝试加载 .env（先找当前目录，再找脚本所在目录）
 try { require("dotenv").config(); } catch {}
@@ -26,20 +29,72 @@ const MODEL = process.env.VISION_MODEL || "xxx";
 
 function parseArgs() {
   const argv = process.argv.slice(2);
-  let imageSource = "", prompt = "", isUrl = false;
+  let imageSource = "", prompt = "", isUrl = false, useClipboard = false, noFallback = false;
 
   for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === "--url" && argv[i + 1]) {
+    if (argv[i] === "--clipboard") {
+      useClipboard = true;
+    } else if (argv[i] === "--no-fallback") {
+      noFallback = true;
+    } else if (argv[i] === "--url" && argv[i + 1]) {
       isUrl = true;
       imageSource = argv[++i];
+    } else if (useClipboard && !argv[i].startsWith("--")) {
+      prompt = prompt ? prompt + " " + argv[i] : argv[i];
     } else if (!imageSource && !argv[i].startsWith("--")) {
       imageSource = argv[i];
     } else if (imageSource && !argv[i].startsWith("--")) {
       prompt = prompt ? prompt + " " + argv[i] : argv[i];
     }
   }
+  if (/^https?:\/\//i.test(imageSource)) {
+    isUrl = true;
+  }
   if (!prompt) prompt = "请详细描述这张图片的内容。";
-  return { imageSource, prompt, isUrl };
+  return { imageSource, prompt, isUrl, useClipboard, noFallback };
+}
+
+function getClipboardReader() {
+  if (process.platform === "darwin") {
+    return (outPath) => {
+      execFileSync("/usr/bin/swift", [path.join(__dirname, "clipboard.swift"), outPath], {
+        stdio: "pipe",
+      });
+      return outPath;
+    };
+  }
+  if (process.platform === "win32") {
+    return (outPath) => {
+      execFileSync(
+        "powershell",
+        [
+          "-NoProfile",
+          "-NonInteractive",
+          "-Sta",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          path.join(__dirname, "clipboard.ps1"),
+          "-OutFile",
+          outPath,
+        ],
+        { stdio: "pipe", windowsHide: true },
+      );
+      return outPath;
+    };
+  }
+  return null;
+}
+
+function readClipboardImage() {
+  const reader = getClipboardReader();
+  if (!reader) {
+    throw new Error(
+      `剪贴板读取暂不支持当前平台: ${process.platform}（目前支持 macOS / Windows）`,
+    );
+  }
+  const outPath = path.join(os.tmpdir(), `vision-clipboard-${Date.now()}.png`);
+  return reader(outPath);
 }
 
 function resolveImageUrl(source, isUrl) {
@@ -87,14 +142,55 @@ async function main() {
     console.error("获取 Key: https://bailian.console.aliyun.com/");
     process.exit(1);
   }
-  const { imageSource, prompt, isUrl } = parseArgs();
-  if (!imageSource) {
+  const { imageSource, prompt, isUrl, useClipboard, noFallback } = parseArgs();
+  let source = imageSource;
+
+  const tryClipboard = () => {
+    try {
+      source = readClipboardImage();
+      console.error("（未提供可用图片路径，已自动回退读取系统剪贴板）");
+      return true;
+    } catch (err) {
+      console.error("剪贴板读取失败:", err.message);
+      return false;
+    }
+  };
+
+  const showUsage = () => {
     console.error("用法: node vision.js <图片路径> [问题]");
     console.error("      node vision.js --url <图片链接> [问题]");
+    console.error("      node vision.js --clipboard [问题]");
+  };
+
+  if (useClipboard) {
+    if (imageSource || isUrl) {
+      console.error("--clipboard 不能和图片路径或 --url 同时使用。");
+      process.exit(1);
+    }
+    if (!tryClipboard()) process.exit(1);
+  } else if (source && !isUrl) {
+    const resolved = path.resolve(source);
+    if (!fs.existsSync(resolved)) {
+      if (noFallback) {
+        console.error(`文件不存在: ${resolved}`);
+        process.exit(1);
+      }
+      if (!tryClipboard()) process.exit(1);
+    }
+  } else if (!source) {
+    if (noFallback) {
+      showUsage();
+      process.exit(1);
+    }
+    if (!tryClipboard()) process.exit(1);
+  }
+
+  if (!source) {
+    showUsage();
     process.exit(1);
   }
   try {
-    const imageUrl = resolveImageUrl(imageSource, isUrl);
+    const imageUrl = resolveImageUrl(source, isUrl);
     const result = await request({
       model: MODEL,
       messages: [{ role: "user", content: [
