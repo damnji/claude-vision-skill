@@ -1,5 +1,7 @@
 # Claude Vision Skill
 
+> If you need the English version, please see [here](./README_en.md).
+
 > 让**没有识图能力的大模型**（如 DeepSeek 等纯文本模型）也能"看图"——把图片发给具备视觉能力的云端模型，用文字把识别结果带回来。
 
 支持任意 **OpenAI 兼容接口** 与 **Anthropic 原生接口**，可配置**主 + 备双模型**自动切换，API 报错自动翻译。
@@ -12,7 +14,6 @@
 - 🔁 **单模型 / 双模型**：启用双模型后，主服务失败自动切换备用服务
 - 🧭 **交互式配置向导**（`node setup.js`）：全程可"返回"重选，无需手改配置
   - 选择是否启用双模型、提供商、API Key、模型名
-  - 提供商为 **deepseek** 时红字警告（多模态能力较弱）
   - 询问模型是否支持 BMP，并支持 AI 联网核实
 - 🏢 **第一方 + 第三方都支持**：ChatGPT / Kimi / Claude / DeepSeek / 千问 / 智谱 GLM / Gemini 官方地址内置；第三方中转站自行填地址
 - 🩹 **BMP 智能路由**：按各模型是否支持 BMP 自动处理
