@@ -19,6 +19,7 @@
 - 🩹 **BMP 智能路由**：按各模型是否支持 BMP 自动处理
 - 💬 **报错自动翻译**：API 错误转成中文"原因 + 正确做法"
 - 🔒 **密钥安全**：API Key 只存 `.env`，不写进脚本、不打包入库
+- 🌐 **中英双语**：配置向导与运行提示支持中文 / 英文（`VISION_LANG=zh|en|auto`）
 
 ## 📦 环境要求
 
@@ -67,6 +68,7 @@ node setup.js
 ```bash
 # .env
 VISION_DUAL_MODEL=false
+VISION_LANG=auto
 VISION_PRIMARY_PROVIDER=<你的提供商，如 kimi / 千问 / 智谱 / 中转站名>
 VISION_PRIMARY_BASE_URL=<该提供商的 OpenAI 兼容地址>
 VISION_PRIMARY_API_KEY=<你的 API Key>
@@ -134,8 +136,11 @@ API 返回错误时自动翻译成中文**报错原因 + 正确做法**：
 vision-skill-v3/
 ├── vision.js        # 识图脚本（核心）
 ├── setup.js         # 交互式配置向导
-├── SKILL.md         # AI 助手使用说明（触发规则）
-├── README.md        # 本说明
+├── i18n.js          # 中英双语支持（语言检测）
+├── SKILL.md         # AI 助手使用说明（触发规则，中文）
+├── SKILL_en.md      # AI 助手使用说明（英文版）
+├── README.md        # 本说明（中文）
+├── README_en.md     # 英文说明
 ├── .env.example     # 配置模板
 └── .gitignore       # 忽略 .env
 ```

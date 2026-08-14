@@ -17,6 +17,7 @@ Supports any **OpenAI-compatible API** and the **Anthropic native API**, with co
 - 🩹 **Smart BMP routing**: handled automatically based on each model's BMP support
 - 💬 **Automatic error translation**: API errors are turned into a Chinese "cause + correct action" hint
 - 🔒 **Key security**: API keys live only in `.env`, never written into scripts or packaged into the repo
+- 🌐 **Bilingual (Chinese/English)**: the setup wizard and runtime messages support both languages (`VISION_LANG=zh|en|auto`)
 
 ## 📦 Requirements
 
@@ -65,6 +66,7 @@ Copy `.env.example` to `.env` and fill it in:
 ```bash
 # .env
 VISION_DUAL_MODEL=false
+VISION_LANG=auto
 VISION_PRIMARY_PROVIDER=<your provider, e.g. kimi / qwen / zhipu / relay name>
 VISION_PRIMARY_BASE_URL=<the provider's OpenAI-compatible endpoint>
 VISION_PRIMARY_API_KEY=<your API key>
@@ -132,9 +134,11 @@ Covers: invalid key / insufficient balance / rate limit / model not found / unsu
 vision-skill-v3/
 ├── vision.js        # recognition script (core)
 ├── setup.js         # interactive config wizard
-├── SKILL.md         # AI assistant usage instructions (trigger rules)
-├── README.md        # this documentation
-├── readme_en.md     # English documentation
+├── i18n.js          # bilingual support (language detection)
+├── SKILL.md         # AI assistant usage instructions (Chinese)
+├── SKILL_en.md      # AI assistant usage instructions (English)
+├── README.md        # documentation (Chinese)
+├── README_en.md     # documentation (English)
 ├── .env.example     # config template
 └── .gitignore       # ignores .env
 ```
