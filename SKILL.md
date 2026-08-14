@@ -1,41 +1,61 @@
 ---
-name: claude-vision-skill
-description: Use when the user shares, pastes, or references an image (local path or URL) and you need to describe, analyze, or recognize its content, especially when the current model cannot read images directly. Run the bundled vision.js helper to convert the image into text.
+name: vision
+description: 识图能力——把图片（本地路径或 URL）发给云端视觉模型，返回文字描述。当用户分享图片路径/链接、消息出现 "Saved attachments:" 并列出图片、或要求分析/描述/识别图片内容时，调用本技能代替 Read 工具（底层模型不具备原生识图能力）。
 ---
 
-# Vision Helper
+# Vision 识图技能
 
-The current model may not support native image input. When the user provides an image path or URL, do not rely on viewing the image directly. Instead run:
+你的底层模型不具备原生识图能力。遇到图片时，**不要用 Read 工具**，运行本技能目录下的 `vision.js`：
 
-```bash
-node /Users/wwu/.codex/skills/claude-vision-skill/vision.js "<absolute image path>" "<prompt>"
+```
+node "./vision.js" "<图片路径>" "用中文描述这张图片"
 ```
 
-For an image URL:
+> `vision.js` 与 `SKILL.md` 位于同一目录。若相对路径 `./vision.js` 执行报"找不到文件"，说明当前工作目录不在技能目录，请改用本技能的绝对路径（即 SKILL.md 所在目录）运行。
 
-```bash
-node /Users/wwu/.codex/skills/claude-vision-skill/vision.js --url "<image url>" "<prompt>"
+## 首次使用：配置向导（重要）
+
+**首次使用（技能目录下还没有 `.env`，或 `.env` 未配置）时，必须先运行交互式配置向导再识图：**
+
+```
+node setup.js
 ```
 
-When the user pastes an image into the chat but no file path or URL is visible:
+向导（`setup.js`）特性：
+- 提供商输入前会提示**推荐选项：智谱 GLM-4.6-V-Flash（免费）**
+- **是否启用双模型** 与 **模型提供商** 两个选择处都提供「返回」选项，可随时回退重输
+- 提供商输入为 **deepseek** 时，用**红色字**警告：`DeepSeek 多模态能力较弱，仅可识别文字，不建议使用！`，用户可选择：仍使用 / 改用其他提供商 / 返回
+- 选择模型后询问该模型**是否支持上传 BMP 图片**（**默认视为不支持**；启用双模型则主备两个都询问；你「AI」应**联网搜索**所选模型是否支持 BMP，**确认支持后**才在向导中选「支持」= true）；若模型不支持 BMP，红字警告：`请注意：模型名 不支持上传 BMP 格式图片！`
+- **第一方提供商**（chatgpt/kimi/claude/deepseek/千问/Gemini/智谱GLM 等）：向导内置官方 API 地址（claude 走 Anthropic 原生接口，其余为 OpenAI 兼容接口），展示给用户确认（可手动改）；如需核实，你（AI）可**联网搜索官方地址**后告知用户，由用户在向导中确认/输入
+- **第三方中转站 / 整合站**：由用户**自行输入**请求地址（base URL）、API Key 和模型
+- 确认后自动写入同目录 `.env`（含密钥，勿提交 git）
 
-```bash
-node /Users/wwu/.codex/skills/claude-vision-skill/vision.js --clipboard "<prompt>"
-```
+> 配置已存在且有效时（`.env` 存在且主服务的 baseUrl、API Key、模型均已填写、Key 非占位符），跳过向导，直接识图。
+> 若用户无法在终端运行向导，可按 `.env.example` 手动填写 `.env`。
 
-`--clipboard` reads the current image from the system clipboard (macOS uses a bundled Swift helper, Windows uses a bundled PowerShell script; the pasted image is usually still there). If it fails, ask the user to save the image to a file and provide the absolute path.
+## 用法
 
-Fallback rules (automatic):
+- 本地图片：`node "./vision.js" "图片路径" "问题"`
+- 网络图片：`node "./vision.js" --url "https://..." "问题"`
+- 识别结果从**标准输出**返回，直接作为回答内容；服务运行信息在 stderr，可忽略
+- 图片路径含空格时务必加引号
+- API 报错时会**自动翻译报错原因并给出正确做法**（如 Key 无效 / 余额不足 / 限流 / 模型不存在 / 图片过大等），输出在 stderr
 
-- If a local path is given but the file does not exist, vision.js automatically falls back to the clipboard.
-- If no image path or URL is given at all, vision.js automatically tries the clipboard.
-- Pass `--no-fallback` to disable this behavior and fail with an explicit error instead.
+## 触发场景
 
-Rules:
+- 用户分享图片路径（本地或网络 URL）
+- 消息中出现 "Saved attachments:" 并列出图片
+- 用户要求分析、描述、识别图片内容
 
-- Always use the absolute path to `vision.js`.
-- Use an absolute image path for local files, or `--url` for remote images.
-- Prefer `--clipboard` when the user pasted an image with no accessible path.
-- Use Chinese for descriptions unless the user asks otherwise.
-- Configuration lives in `.env` next to `vision.js` (`DASHSCOPE_API_KEY`, `VISION_MODEL`, `DASHSCOPE_BASE_URL`). Never print or commit the API key.
-- If the API call fails, report the error to the user and ask them to check the key, model, or base URL.
+## BMP 图片处理
+
+识别时若图片为 BMP，按各模型是否支持（`.env` 的 `VISION_PRIMARY_BMP` / `VISION_FALLBACK_BMP`，**未配置默认视为不支持**，需联网核实确认支持后设为 `true`）自动处理：
+
+- **单模型**：主模型不支持 BMP → 红色提示 `此模型不支持上传BMP格式图片`
+- **双模型**：主模型不支持、备用支持 → 自动改用**备用模型**识别，并告知用户已用备用模型识图
+- **双模型**：两个模型都不支持 → 红色提示 `模型不支持上传BMP格式图片`
+
+## 改配置 / 重置
+
+- 修改 `vision-skill-v3/.env` 即可；或删除 `.env` 后运行 `node setup.js` 重新配置
+- 配置项含义见 `.env.example`

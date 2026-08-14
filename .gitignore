@@ -1,2 +1,3 @@
-node_modules/
+# 密钥，勿提交
 .env
+node_modules/
