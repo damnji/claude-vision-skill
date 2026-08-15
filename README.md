@@ -1,7 +1,5 @@
 # Claude Vision Skill
 
-> If you need the English version, please see [here](./README_en.md).
-
 > 让**没有识图能力的大模型**（如 DeepSeek 等纯文本模型）也能"看图"——把图片发给具备视觉能力的云端模型，用文字把识别结果带回来。
 
 支持任意 **OpenAI 兼容接口** 与 **Anthropic 原生接口**，可配置**主 + 备双模型**自动切换，API 报错自动翻译。
@@ -19,7 +17,7 @@
 - 🩹 **BMP 智能路由**：按各模型是否支持 BMP 自动处理
 - 💬 **报错自动翻译**：API 错误转成中文"原因 + 正确做法"
 - 🔒 **密钥安全**：API Key 只存 `.env`，不写进脚本、不打包入库
-- 🌐 **中英双语**：配置向导与运行提示支持中文 / 英文（`VISION_LANG=zh|en|auto`）
+- 🌏 **中文输出**：脚本输出为中文，英文用户由 AI 助手翻译转达
 
 ## 📦 环境要求
 
@@ -57,6 +55,8 @@ node vision.js "图片路径" "用中文描述这张图片"
 
 AI 确认后自动写入技能目录下的 `.env`。
 
+> 脚本输出为中文；英文用户由 AI 助手翻译转达。
+
 ### 方式二：手动编辑 `.env`
 
 复制 `.env.example` 为 `.env` 并填写：
@@ -64,7 +64,6 @@ AI 确认后自动写入技能目录下的 `.env`。
 ```bash
 # .env
 VISION_DUAL_MODEL=false
-VISION_LANG=auto
 VISION_PRIMARY_PROVIDER=<你的提供商，如 kimi / 千问 / 智谱 / 中转站名>
 VISION_PRIMARY_BASE_URL=<该提供商的 OpenAI 兼容地址>
 VISION_PRIMARY_API_KEY=<你的 API Key>
@@ -131,11 +130,8 @@ API 返回错误时自动翻译成中文**报错原因 + 正确做法**：
 ```
 vision-skill-v3/
 ├── vision.js        # 识图脚本（核心）
-├── i18n.js          # 中英双语支持（语言检测）
-├── SKILL.md         # AI 助手使用说明（触发规则，中文）
-├── SKILL_en.md      # AI 助手使用说明（英文版）
-├── README.md        # 本说明（中文）
-├── README_en.md     # 英文说明
+├── SKILL.md         # AI 助手使用说明（触发规则 + 配置向导）
+├── README.md        # 本说明
 ├── .env.example     # 配置模板
 └── .gitignore       # 忽略 .env
 ```

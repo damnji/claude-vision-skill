@@ -29,7 +29,6 @@ node "./vision.js" "<图片路径>" "用中文描述这张图片"
 7. **写入配置**：全部确认后，你**用 Write 工具**在技能目录下生成 `.env`，格式见 `.env.example`，至少包含：
    ```
    VISION_DUAL_MODEL=true|false
-   VISION_LANG=zh|en          （按本次对话语言）
    VISION_PRIMARY_PROVIDER=...
    VISION_PRIMARY_BASE_URL=...
    VISION_PRIMARY_API_KEY=...
@@ -53,6 +52,7 @@ node "./vision.js" "<图片路径>" "用中文描述这张图片"
 - 网络图片：`node "./vision.js" --url "https://..." "问题"`
 - 识别结果从**标准输出**返回，直接作为回答内容；服务运行信息在 stderr，可忽略
 - 图片路径含空格时务必加引号
+- 脚本输出为中文；若用户需要英文，由你（AI）**翻译后**转达
 - API 报错时会**自动翻译报错原因并给出正确做法**（如 Key 无效 / 余额不足 / 限流 / 模型不存在 / 图片过大等），输出在 stderr
 
 ## 触发场景
