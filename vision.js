@@ -38,8 +38,10 @@ const red = (s) => (USE_COLOR ? "\x1b[31m" + s + "\x1b[0m" : s);
 
 // ---- 内置极简 .env 加载器（无需安装 dotenv）----
 (function loadEnv() {
-  // 技能自身的 .env（__dirname，由 AI 按 SKILL.md 向导生成）优先，避免被 cwd 下无关的 .env 覆盖
-  const files = [path.resolve(__dirname, ".env"), path.resolve(process.cwd(), ".env")];
+  // 技能自身的 .env（__dirname，由 AI 按 SKILL.md 向导生成）优先；
+  // 仅当其不存在时才回退到 cwd 的 .env，避免无关项目 .env 的键泄漏进配置
+  const skillEnv = path.resolve(__dirname, ".env");
+  const files = fs.existsSync(skillEnv) ? [skillEnv] : [path.resolve(process.cwd(), ".env")];
   for (const f of files) {
     if (!fs.existsSync(f)) continue;
     try {
@@ -206,7 +208,10 @@ function isValidHttpUrl(v) {
 
 // 图片链接校验：只要求协议正确，允许带查询参数/锚点（CDN 签名、尺寸参数等图片链接常见）
 function isImageUrlLike(v) {
-  if (v.startsWith("data:")) return true;
+  if (v.startsWith("data:")) {
+    // 仅接受形如 data:image/<type>[;参数...],<数据> 的合法图片 data URI，拒绝 data:garbage 之类
+    return /^data:image\/[a-z0-9.+-]+(?:;[a-z0-9.+-]+)*,\S+/i.test(v);
+  }
   try {
     const u = new URL(v);
     return u.protocol === "http:" || u.protocol === "https:";
@@ -283,9 +288,6 @@ function explainApiError(statusCode, raw) {
   } else if (has(/unauthorized|authentication_error|invalid_x_api_key|invalid_api_key|invalid credentials/)) {
     cause = "鉴权失败（API Key 无效、过期或无权限）";
     action = "核对 API Key；确认账号有效且已开通该服务；必要时重新生成 Key。";
-  } else if (has(/api[ _-]?key/)) {
-    cause = "API Key 无效或鉴权失败";
-    action = "检查 .env 中 VISION_PRIMARY_API_KEY / VISION_FALLBACK_API_KEY 是否正确（复制完整、无多余空格）；必要时到平台重新生成一个 Key。";
   } else if (statusCode === 404) {
     cause = "请求地址（base URL）或接口路径不存在";
     action = "检查 .env 中 VISION_PRIMARY_BASE_URL / VISION_FALLBACK_BASE_URL 是否为该提供商的官方 OpenAI 兼容地址（可让 AI 联网核实）。";
@@ -298,6 +300,9 @@ function explainApiError(statusCode, raw) {
   } else if (statusCode >= 500) {
     cause = "服务端暂时出错或过载";
     action = "稍后重试；若持续报错，可能是该提供商服务故障。";
+  } else if (has(/api[ _-]?key/)) {
+    cause = "API Key 无效或鉴权失败";
+    action = "检查 .env 中 VISION_PRIMARY_API_KEY / VISION_FALLBACK_API_KEY 是否正确（复制完整、无多余空格）；必要时到平台重新生成一个 Key。";
   } else {
     cause = "服务端返回错误（未识别具体类型）";
     action = "根据下方原始错误排查，或让 AI 联网查询该错误码含义。";
