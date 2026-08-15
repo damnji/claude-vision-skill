@@ -13,36 +13,48 @@ node "./vision.js" "<图片路径>" "用中文描述这张图片"
 
 > `vision.js` 与 `SKILL.md` 位于同一目录。若相对路径 `./vision.js` 执行报"找不到文件"，说明当前工作目录不在技能目录，请改用本技能的绝对路径（即 SKILL.md 所在目录）运行。
 
-## 首次使用：配置向导（由你交互完成，严格按顺序）
+## 首次使用：配置向导（强制顺序，逐步执行）
 
-**首次使用（技能目录下还没有 `.env`，或 `.env` 未配置）时，由你（AI）按下面 1→8 的顺序与用户对话完成配置，再识图。** 这是唯一的配置方式，没有独立脚本——由你逐问、等回答、再下一步。**严格按顺序，每步问完等用户回答，不要跳步、不要合并提问。**
+**这是唯一的配置方式。你（AI）必须严格按下面的顺序逐问逐答，任何跳步、合并提问、提前索取、自行重排都是禁止的。** 未收到用户回答前禁止进入下一步；全部步骤完成前禁止写入 `.env`。
 
-1. **是否启用双模型？**（主服务 + 备用服务，主服务失败自动切换）——是 / 否。
-2. **主服务提供商？**（可提示推荐选项：智谱 GLM-4.6-V-Flash（免费））
-   - **第一方提供商**（chatgpt / kimi / claude / deepseek / 千问 / 智谱 / Gemini 等）：你**联网搜索**该提供商的官方 OpenAI 兼容地址（base URL），展示给用户**确认后**使用；claude 走 Anthropic 原生接口（`x-api-key`），其余为 OpenAI 兼容。
-   - 提供商为 **deepseek** 时：用**红色字**警告 `⚠ DeepSeek 多模态能力较弱，仅可识别文字，不建议使用！`，让用户确认是否仍使用（仍使用 / 改用其他）。
-   - **第三方中转站 / 整合站**：让用户**自行输入**请求地址（base URL）。
-3. **主服务 API Key？**——让用户输入（不写进脚本/仓库，只进 `.env`）。
-4. **主服务模型名？**——让用户输入（如 gpt-4o-mini / kimi-k2.6 / qwen3.8-max / GLM-4.6-V-Flash）。
-5. **主模型是否支持 BMP 上传？**——**默认视为不支持**；你**联网核实**该模型是否支持 BMP，**确认支持才记 `true`**；不支持则红字提示 `请注意：模型名 不支持上传 BMP 格式图片！`。
-6. **若第 1 步启用了双模型**：对**备用服务**重复步骤 2–5。
-7. **写入配置**：全部确认后，你**用 Write 工具**在技能目录下生成 `.env`，格式见 `.env.example`，至少包含：
-   ```
-   VISION_DUAL_MODEL=true|false
-   VISION_PRIMARY_PROVIDER=...
-   VISION_PRIMARY_BASE_URL=...
-   VISION_PRIMARY_API_KEY=...
-   VISION_PRIMARY_MODEL=...
-   VISION_PRIMARY_BMP=true|false
-   # 双模型时再加：
-   VISION_FALLBACK_PROVIDER=...
-   VISION_FALLBACK_BASE_URL=...
-   VISION_FALLBACK_API_KEY=...
-   VISION_FALLBACK_MODEL=...
-   VISION_FALLBACK_BMP=true|false
-   ```
-   `.env` 含密钥，**不要提交到任何 git 仓库**。
-8. 提示用户配置完成，可开始识图。
+### 执行规则（必须无条件遵守）
+
+1. **一次只问一个问题**，问完立即停下，等待用户回答。
+2. 收到回答后再进入下一步；**禁止**两个问题一起问、禁止提前索要后续信息。
+3. 全程维护**步骤清单**，每完成一步标记 ✅，不跳格、不回填。
+4. 写 `.env` **之前必须逐项核对清单全部 ✅**，缺一不可；然后把完整配置摘要展示给用户**确认**，再写入。
+5. 全程用与用户相同的语言交互。
+
+### 步骤清单（严格 1 → 8，逐步勾选）
+
+- [ ] **1. 是否启用双模型？**（主服务 + 备用服务，主服务失败自动切换）——是 / 否。
+- [ ] **2. 主服务提供商？**（可提示推荐：智谱 GLM-4.6-V-Flash（免费））
+      - **第一方**（chatgpt/kimi/claude/deepseek/千问/智谱/Gemini 等）：**联网搜索**官方 OpenAI 兼容地址，展示给用户**确认后**使用；claude 走 Anthropic 原生接口（`x-api-key`）。
+      - 提供商为 **deepseek**：先用**红色字**警告 `⚠ DeepSeek 多模态能力较弱，仅可识别文字，不建议使用！`，让用户确认是否仍使用。
+      - **第三方中转站**：让用户**自行输入**请求地址。
+- [ ] **3. 主服务 API Key？**——让用户输入（只进 `.env`，不写进脚本/仓库）。
+- [ ] **4. 主服务模型名？**——让用户输入。
+- [ ] **5. 主模型是否支持 BMP 上传？**——**默认不支持**；你**联网核实**，确认支持才记 `true`；不支持则红字提示 `请注意：模型名 不支持上传 BMP 格式图片！`。
+- [ ] **6. 若第 1 步为"是"**：对**备用服务**重复步骤 2–5。
+- [ ] **7. 写 .env**：**先逐项核对 1–6 全部 ✅**，再用 Write 工具在技能目录生成 `.env`（字段见下）。`.env` 含密钥，**勿提交 git**。
+- [ ] **8. 提示完成**，可开始识图。
+
+### .env 字段（步骤 7 写入）
+
+```
+VISION_DUAL_MODEL=true|false
+VISION_PRIMARY_PROVIDER=...
+VISION_PRIMARY_BASE_URL=...
+VISION_PRIMARY_API_KEY=...
+VISION_PRIMARY_MODEL=...
+VISION_PRIMARY_BMP=true|false
+# 双模型时再加：
+VISION_FALLBACK_PROVIDER=...
+VISION_FALLBACK_BASE_URL=...
+VISION_FALLBACK_API_KEY=...
+VISION_FALLBACK_MODEL=...
+VISION_FALLBACK_BMP=true|false
+```
 
 > 配置已存在且有效时（`.env` 存在且主服务的 baseUrl、API Key、模型均已填写、Key 非占位符），跳过向导，直接识图。
 
