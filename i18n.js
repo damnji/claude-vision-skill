@@ -39,9 +39,15 @@ function lang() {
   return _lang;
 }
 
+// 手动指定语言（如 setup 向导开头的语言选择；同时写入环境变量保持一致）
+function setLang(l) {
+  _lang = l === "en" ? "en" : "zh";
+  process.env.VISION_LANG = _lang;
+}
+
 // 取当前语言的文本：L({ zh: "...", en: "..." })，缺省回落中文
 function L(pair) {
   return (pair && pair[lang()]) || (pair && pair.zh) || String(pair);
 }
 
-module.exports = { L, lang, detectLang };
+module.exports = { L, lang, detectLang, setLang };

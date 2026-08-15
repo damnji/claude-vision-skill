@@ -50,6 +50,7 @@ node setup.js
 
 The wizard asks, in order:
 
+0. **Select the interface language** (Chinese / English)
 1. **Enable dual model?** (primary + fallback; auto-switch when the primary fails)
 2. **Primary provider?** (recommended option: **Zhipu GLM-4.6-V-Flash (free)**)
    - **First-party providers** (chatgpt / kimi / claude / deepseek / qwen / zhipu / gemini): the wizard has built-in official endpoints — confirm and use, or edit manually

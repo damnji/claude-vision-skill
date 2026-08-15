@@ -17,7 +17,7 @@
 const fs = require("fs");
 const path = require("path");
 const readline = require("readline");
-const { L, lang } = require("./i18n.js");
+const { L, lang, setLang } = require("./i18n.js");
 
 // 读取技能目录已有 .env 中的 VISION_LANG（若环境变量未显式设置），保证重跑向导语言一致
 (function loadEnvLang() {
@@ -276,6 +276,17 @@ function writeEnv(dualModel, primary, fallback) {
 }
 
 async function main() {
+  // 第一步：选择界面语言（双语提示，不受系统区域影响；选后整个向导用该语言）
+  {
+    const lc = await menu("请选择界面语言 / Select interface language:", [
+      { k: "1", label: "中文", val: "zh" },
+      { k: "2", label: "English", val: "en" },
+      { k: "q", label: "退出 / Quit", val: "quit" },
+    ]);
+    if (lc === "quit") { console.log("已退出。Exited."); rl.close(); process.exitCode = 0; return; }
+    setLang(lc);
+  }
+
   console.log(bold(L({ zh: "\n=== Vision Skill 配置向导 ===\n", en: "\n=== Vision Skill Setup Wizard ===\n" })));
   console.log(L({ zh: "将生成配置: " + ENV_PATH, en: "Will write config to: " + ENV_PATH }));
   console.log(red(L({ zh: "（.env 含 API Key，请勿提交到 git）", en: "(.env contains API keys — never commit it to git)" })) + "\n");
