@@ -39,7 +39,7 @@ const red = (s) => (USE_COLOR ? "\x1b[31m" + s + "\x1b[0m" : s);
 
 // ---- 内置极简 .env 加载器（无需安装 dotenv）----
 (function loadEnv() {
-  // 技能自身的 .env（__dirname，由 setup.js 生成）优先，避免被 cwd 下无关的 .env 覆盖
+  // 技能自身的 .env（__dirname，由 AI 按 SKILL.md 向导生成）优先，避免被 cwd 下无关的 .env 覆盖
   const files = [path.resolve(__dirname, ".env"), path.resolve(process.cwd(), ".env")];
   for (const f of files) {
     if (!fs.existsSync(f)) continue;

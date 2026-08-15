@@ -31,8 +31,8 @@ Supports any **OpenAI-compatible API** and the **Anthropic native API**, with co
 # 2. Enter the skill directory
 cd vision-skill-v3
 
-# 3. Run the interactive config wizard and follow the prompts
-node setup.js
+# 3. Have your AI assistant configure it via the SKILL.md setup wizard
+#    (strict order: dual model → provider → API key → model → BMP support)
 
 # 4. Start recognizing images
 node vision.js "image.png" "Describe this image in Chinese"
@@ -42,23 +42,18 @@ After configuring, merge the contents of `SKILL.md` into your AI assistant's con
 
 ## ⚙️ Configuration
 
-### Option 1: Interactive wizard (recommended)
+### Option 1: AI-assisted (recommended)
 
-```bash
-node setup.js
-```
+In an AI assistant (e.g. Claude Code), have it follow the **SKILL.md setup wizard**. The AI asks strictly in order, verifying online and confirming within the conversation:
 
-The wizard asks, in order:
-
-0. **Select the interface language** (Chinese / English)
 1. **Enable dual model?** (primary + fallback; auto-switch when the primary fails)
 2. **Primary provider?** (recommended option: **Zhipu GLM-4.6-V-Flash (free)**)
-   - **First-party providers** (chatgpt / kimi / claude / deepseek / qwen / zhipu / gemini): the wizard has built-in official endpoints — confirm and use, or edit manually
-   - **Third-party relay / aggregation stations**: enter the request endpoint, API Key, and model yourself
+   - **First-party providers** (chatgpt / kimi / claude / deepseek / qwen / zhipu / gemini): the AI searches online for the official endpoint and uses it after confirmation
+   - **Third-party relay / aggregation stations**: you enter the request endpoint yourself
 3. **API Key and model name**
-4. **Does this model support BMP uploads?** (**default: no**; can be verified online via AI — choose "yes" only when confirmed)
+4. **Does this model support BMP uploads?** (**default: no**; the AI verifies online and records `true` only when confirmed)
 
-`.env` is written automatically after confirmation.
+After confirmation, the AI writes `.env` in the skill directory automatically.
 
 ### Option 2: Edit `.env` manually
 
@@ -77,7 +72,7 @@ VISION_PRIMARY_BMP=<does the model support BMP: fill true if confirmed, otherwis
 
 > ⚠️ `.env` contains keys and is ignored by `.gitignore` — **never commit it to git**.
 >
-> The values above depend entirely on the **provider and model** you choose — API endpoints, key formats (not always `sk-`-prefixed), and model names differ between services, and BMP support varies by model. Prefer generating with the wizard (`node setup.js`); when filling manually, follow your provider's official docs. Each field in `.env.example` has a comment.
+> The values above depend entirely on the **provider and model** you choose — API endpoints, key formats (not always `sk-`-prefixed), and model names differ between services, and BMP support varies by model. Prefer having AI generate it via the SKILL.md wizard; when filling manually, follow your provider's official docs. Each field in `.env.example` has a comment.
 
 ## 🧠 Usage
 
@@ -134,7 +129,6 @@ Covers: invalid key / insufficient balance / rate limit / model not found / unsu
 ```
 vision-skill-v3/
 ├── vision.js        # recognition script (core)
-├── setup.js         # interactive config wizard
 ├── i18n.js          # bilingual support (language detection)
 ├── SKILL.md         # AI assistant usage instructions (Chinese)
 ├── SKILL_en.md      # AI assistant usage instructions (English)
@@ -158,7 +152,7 @@ Merge the rules from `SKILL.md` into your project or global config (e.g. Claude 
 
 | Symptom | Cause & fix |
 |---------|-------------|
-| `未检测到有效配置` | Not configured yet — run `node setup.js` or fill `.env` manually |
+| `未检测到有效配置` | Not configured yet — have AI configure via the SKILL.md wizard, or fill `.env` manually |
 | `模型名不存在或无权访问` | The model name in `.env` is wrong or not enabled; use the real model name on the platform |
 | `账号余额不足或额度用尽` | Top up or claim free quota on the platform |
 | `图片过大` | Compress the image or lower the resolution (20MB / Anthropic 5MB) |
