@@ -24,17 +24,28 @@
 
 ## 🚀 快速开始
 
+### 方式一：npm 安装（推荐）
+
+```bash
+# 1. 全局安装（任何目录都能用 vision 命令）
+npm install -g vision-skill
+
+# 2. 让 AI 助手按 SKILL.md 的「配置向导」逐步配置
+#    （严格顺序：是否双模型 → 提供商 → API Key → 模型 → BMP 支持）
+
+# 3. 开始识图
+vision "图片路径" "用中文描述这张图片"
+```
+
+### 方式二：仓库克隆
+
 ```bash
 # 1. 下载并解压本仓库
 git clone https://github.com/damnji/vision-skill.git
-
-# 2. 进入技能目录
 cd vision-skill
 
-# 3. 让 AI 助手按 SKILL.md 的「配置向导」逐步配置
-#    （严格顺序：是否双模型 → 提供商 → API Key → 模型 → BMP 支持）
-
-# 4. 开始识图
+# 2. 让 AI 助手按 SKILL.md 的「配置向导」逐步配置
+# 3. 开始识图
 node vision.js "图片路径" "用中文描述这张图片"
 ```
 
