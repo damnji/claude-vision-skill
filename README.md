@@ -161,10 +161,12 @@ node "<技能目录>/vision.js" "<图片路径>" "用中文描述这张图片"
 
 当用户让你（AI 助手）安装 vision 技能（或把本仓库发给你时），按以下步骤**自动安装**：
 
-1. **获取文件**：克隆本仓库，取出 `vision.js`、`SKILL.md`、`.env.example`、`.gitignore`。
-2. **选择安装位置**（询问用户，或默认全局）：
-   - **全局**（所有项目可用）：`~/.claude/skills/vision/`
-   - **仅当前项目**：`.claude/skills/vision/`
+1. **获取文件**（二选一）：
+   - **npm 安装**：`npm install -g vision-skill`（全局，`vision` 命令可用；或项目内 `npm install vision-skill`）。技能文件在 npm 安装目录（全局用 `npm root -g` 定位），含 `vision.js`、`SKILL.md`、`package.json`、`LICENSE`。
+   - **仓库克隆**：`git clone https://github.com/damnji/vision-skill.git`，取出 `vision.js`、`SKILL.md`、`.env.example`、`.gitignore`。
+2. **确定技能目录**（用于放置/指向 `SKILL.md` 与 `vision.js`，`.env` 也写在这里）：
+   - **npm 全局**：`npm root -g` 下的 `vision-skill/`；**项目内**：`node_modules/vision-skill/`。
+   - **全局技能位**（所有项目可用）：`~/.claude/skills/vision/`；**仅当前项目**：`.claude/skills/vision/`。
 3. **写入触发规则**：把 `SKILL.md` 里的「触发场景」与调用方式并入 `~/.claude/CLAUDE.md`（全局）或项目 `CLAUDE.md`，例如：
    ```
    遇到图片时不要用内置读图工具，改为运行：
