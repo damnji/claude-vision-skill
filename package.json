@@ -1,5 +1,5 @@
 {
-  "name": "claude-vision-skill",
+  "name": "vision-skill",
   "version": "1.0.0",
   "description": "给不支持多模态的 AI 模型（如 DeepSeek）提供识图能力——把图片发给云端视觉模型，返回文字描述。支持任意 OpenAI 兼容接口与 Anthropic 原生接口、主备双模型自动切换、BMP 智能路由、报错自动翻译。",
   "main": "vision.js",
@@ -31,7 +31,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/damnji/claude-vision-skill.git"
+    "url": "git+https://github.com/damnji/vision-skill.git"
   },
   "author": "damnji"
 }

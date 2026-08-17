@@ -83,5 +83,5 @@ VISION_FALLBACK_BMP=true|false
 
 ## 改配置 / 重置
 
-- 修改 `vision-skill-v3/.env` 即可；或删除 `.env` 后重新走上面的配置向导
+- 修改 `vision-skill/.env` 即可；或删除 `.env` 后重新走上面的配置向导
 - 配置项含义见 `.env.example`

@@ -25,10 +25,11 @@
 ## 🚀 快速开始
 
 ```bash
-# 1. 下载并解压本仓库（或 release 里的 zip）
+# 1. 下载并解压本仓库
+git clone https://github.com/damnji/vision-skill.git
 
 # 2. 进入技能目录
-cd vision-skill-v3
+cd vision-skill
 
 # 3. 让 AI 助手按 SKILL.md 的「配置向导」逐步配置
 #    （严格顺序：是否双模型 → 提供商 → API Key → 模型 → BMP 支持）
@@ -47,7 +48,7 @@ node vision.js "图片路径" "用中文描述这张图片"
 
 1. **是否启用双模型？**（主服务 + 备用服务，主服务失败自动切换）
 2. **主服务提供商？**（推荐可选：**智谱 GLM-4.6-V-Flash（免费）**）
-   - **第一方提供商**（chatgpt / kimi / claude / deepseek / 千问 / 智谱 / gemini）：AI 联网搜索官方地址，确认后使用
+   - **第一方提供商**（chatgpt / kimi / claude / 千问 / 智谱 / gemini）：AI 联网搜索官方地址，确认后使用
    - **第三方中转站 / 整合站**：由你自行输入请求地址
 3. **API Key 与模型名**
 4. **该模型是否支持 BMP 上传？**（**默认不支持**；AI 联网核实，确认支持才记 `true`）
@@ -127,7 +128,7 @@ API 返回错误时自动翻译成中文**报错原因 + 正确做法**：
 ## 📁 文件结构
 
 ```
-vision-skill-v3/
+vision-skill/
 ├── vision.js        # 识图脚本（核心）
 ├── SKILL.md         # AI 助手使用说明（触发规则 + 配置向导）
 ├── README.md        # 本说明
@@ -149,7 +150,7 @@ node "<技能目录>/vision.js" "<图片路径>" "用中文描述这张图片"
 
 当用户让你（AI 助手）安装 vision 技能（或把本仓库发给你时），按以下步骤**自动安装**：
 
-1. **获取文件**：克隆本仓库或下载 release zip，取出 `vision.js`、`SKILL.md`、`.env.example`、`.gitignore`。
+1. **获取文件**：克隆本仓库，取出 `vision.js`、`SKILL.md`、`.env.example`、`.gitignore`。
 2. **选择安装位置**（询问用户，或默认全局）：
    - **全局**（所有项目可用）：`~/.claude/skills/vision/`
    - **仅当前项目**：`.claude/skills/vision/`
